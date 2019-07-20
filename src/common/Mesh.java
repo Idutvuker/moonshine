@@ -1,11 +1,9 @@
 package common;
 
-import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.Arrays;
 
 import static org.lwjgl.opengl.GL33.*;
 
@@ -39,33 +37,32 @@ public class Mesh extends Spatial
 
 		glBindVertexArray(vaoID);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboID);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
-
 		glBindBuffer(GL_ARRAY_BUFFER, vboID);
 		glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboID);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
 
 		//material.use();
 
 		//Vertex position
-		glVertexAttribPointer(0, verticesCount, GL_FLOAT, false, 20, 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, false, 20, 0);
 		glEnableVertexAttribArray(0);
 
 		//Vertex texture coords
-		glVertexAttribPointer(1, verticesCount, GL_FLOAT, false, 20, 12);
+		glVertexAttribPointer(1, 2, GL_FLOAT, false, 20, 12);
 		glEnableVertexAttribArray(1);
 
 
 		//Unbinding
 		glBindVertexArray(0);
 
-
-
 	}
 
 
 	public void draw(FloatBuffer MVPbuffer)
 	{
+
 		//float[] arr = new float[16];
 		//MVPbuffer.get(arr);
 		//MVPbuffer.flip();
@@ -77,8 +74,13 @@ public class Mesh extends Spatial
 		material.setMVP(MVPbuffer);
 
 		glBindVertexArray(vaoID);
+		//System.out.println("Drawing V: " + verticesCount);
+
 		glDrawElements(GL_TRIANGLES, verticesCount, GL_UNSIGNED_INT, 0);
+		//System.out.println("Finished!");
 		glBindVertexArray(0);
+
+
 	}
 
 	public int getVaoID() {

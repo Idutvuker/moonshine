@@ -6,8 +6,10 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import system.Mouselook;
 import system.Renderer;
 import system.Timer;
+import util.ModelLoader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL33.*;
@@ -46,15 +48,12 @@ public class Main
 	private void initWorld()
 	{
 		root = new Node();
+
 		initMeshes();
 		initCamera();
 
+
 		renderer = new Renderer(window, camera);
-
-		Spatial player = new Spatial();
-		root.addChild(player);
-		player.addChild(camera);
-
 		mouselook = new Mouselook(window, camera);
 	}
 
@@ -99,13 +98,28 @@ public class Main
 
 		mesh2 = new Mesh(3, vertices2, indices1, mat2);
 		mesh2.setPosition(new Vector3f(0, 2.0f, 0.f));
-		root.addChild(mesh2);
+		mesh1.addChild(mesh2);
+
+
+		float[] verts = {1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+						-1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+						-1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+
+						1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+						1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+						-1.0f, 0.0f, -1.0f, 0.0f, 0.0f};
+
+		int[] indices = {0, 1, 2, 0, 3, 1};
+
+		Mesh[] meshes = ModelLoader.load("res/models/monkey.obj");
+		root.addChild(meshes[0]);
 	}
 
 
 	private void initCamera()
 	{
 		camera = new Camera(70.f, ((float) window_width) / window_height, 0.01f, 100.f);
+		root.addChild(camera);
 	}
 
 	private Timer timer = new Timer();
@@ -156,11 +170,6 @@ public class Main
 
 		if (window.isKeyPressed(GLFW_KEY_DOWN))
 			mesh2.getTransform().rotateZ(delta);
-	}
-
-	private void draw()
-	{
-
 	}
 
 	private void quit()

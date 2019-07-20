@@ -45,7 +45,7 @@ public class Renderer
 	private void draw(Mesh mesh)
 	{
 		Matrix4f model = mesh.renderTransform;
-		viewProj.mul(model).get(MVPbuffer);
+		viewProj.mul(model, model).get(MVPbuffer);
 
 		mesh.draw(MVPbuffer);
 	}
@@ -53,12 +53,14 @@ public class Renderer
 	private Matrix4f viewProj = new Matrix4f();
 	private Matrix4f view = new Matrix4f();
 
-	private static Matrix4f IDENTITY = new Matrix4f();
+	private static final Matrix4f IDENTITY = new Matrix4f();
 
 	public void renderScene(Node treeRoot)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		calculateWorldTransforms(treeRoot, IDENTITY);
+
+		//System.out.println(camera.renderTransform);
 
 		Matrix4f proj = camera.getProjectionMatrix();
 		camera.renderTransform.invert(view);
@@ -71,14 +73,14 @@ public class Renderer
 
 	private void calculateWorldTransforms(Node node, Matrix4f prev)
 	{
+
 		Matrix4f cur = prev;
 		if (node instanceof Spatial)
 		{
 			Spatial spatial = ((Spatial) node);
-			Matrix4f transform = spatial.getTransform();
+			Matrix4f localTransform = spatial.getTransform();
 
-			//TODO transform.mul(prev) ??
-			cur = prev.mul(transform, spatial.renderTransform);
+			cur = prev.mul(localTransform, spatial.renderTransform);
 		}
 
 		for (Node child : node.getChildren())
