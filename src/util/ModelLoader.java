@@ -3,6 +3,7 @@ package util;
 
 import common.Material;
 import common.Mesh;
+import common.VertexAttribSetup;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.AIFace;
 import org.lwjgl.assimp.AIMesh;
@@ -50,12 +51,16 @@ public class ModelLoader
 		float[] normals;
 		int[] indices = processIndices(aiMesh);
 
-		System.out.println(Arrays.toString(vertices));
-		System.out.println(Arrays.toString(indices));
+		//System.out.println(Arrays.toString(vertices));
+		//System.out.println(Arrays.toString(indices));
+
+		int[] attribSizes = {3, 2};
+		VertexAttribSetup vas = new VertexAttribSetup(attribSizes);
 
 		Material mat1 = new Material(
 				"res/shaders/vs_basic.glsl",
-				"res/shaders/fs_basic.glsl");
+				"res/shaders/fs_basic.glsl",
+				vas);
 
 		return new Mesh(aiMesh.mNumVertices(), vertices, indices, mat1);
 	}

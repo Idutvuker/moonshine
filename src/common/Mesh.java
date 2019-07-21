@@ -1,6 +1,7 @@
 package common;
 
 import org.lwjgl.BufferUtils;
+import util.GLTypeSizes;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -45,13 +46,22 @@ public class Mesh extends Spatial
 
 		//material.use();
 
-		//Vertex position
-		glVertexAttribPointer(0, 3, GL_FLOAT, false, 20, 0);
-		glEnableVertexAttribArray(0);
+		VertexAttribSetup.Attrib[] setup = material.vertexAttribSetup.getSetup();
+
+		for (int i = 0; i < setup.length; i++)
+		{
+			VertexAttribSetup.Attrib attr = setup[i];
+
+			if (attr.skip)
+				continue;
+
+			glVertexAttribPointer(i, attr.size, attr.type, false, attr.stride, attr.offset);
+			glEnableVertexAttribArray(i);
+		}
 
 		//Vertex texture coords
-		glVertexAttribPointer(1, 2, GL_FLOAT, false, 20, 12);
-		glEnableVertexAttribArray(1);
+		//glVertexAttribPointer(1, 2, GL_FLOAT, false, 20, 12);
+		//glEnableVertexAttribArray(1);
 
 
 		//Unbinding
@@ -60,7 +70,7 @@ public class Mesh extends Spatial
 	}
 
 
-	public void draw(FloatBuffer MVPbuffer)
+	public void draw(FloatBuffer MVPBuffer)
 	{
 
 		//float[] arr = new float[16];
@@ -71,7 +81,7 @@ public class Mesh extends Spatial
 		//System.out.println(MVPmat.toString());
 
 		material.use();
-		material.setMVP(MVPbuffer);
+		material.setMVP(MVPBuffer);
 
 		glBindVertexArray(vaoID);
 		//System.out.println("Drawing V: " + verticesCount);

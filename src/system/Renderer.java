@@ -25,6 +25,8 @@ public class Renderer
 
 	private void initGL()
 	{
+		//System.out.println(glGetString(GL_RENDERER));
+
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(0.3f, 0.3f, 0.3f, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -40,14 +42,14 @@ public class Renderer
 		}
 	}
 
-	private FloatBuffer MVPbuffer = BufferUtils.createFloatBuffer(16);
+	private FloatBuffer MVPBuffer = BufferUtils.createFloatBuffer(16);
 
 	private void draw(Mesh mesh)
 	{
 		Matrix4f model = mesh.renderTransform;
-		viewProj.mul(model, model).get(MVPbuffer);
+		viewProj.mul(model, model).get(MVPBuffer);
 
-		mesh.draw(MVPbuffer);
+		mesh.draw(MVPBuffer);
 	}
 
 	private Matrix4f viewProj = new Matrix4f();

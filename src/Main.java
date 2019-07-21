@@ -80,9 +80,13 @@ public class Main
 				0.5f, 0.5f, 0f,    0.5f, -0.5f,
 		};
 
+		int[] sizes = {3, 2};
+		VertexAttribSetup vas = new VertexAttribSetup(sizes);
+
 		Material mat1 = new Material(
 				"res/shaders/vs_basic.glsl",
-				"res/shaders/fs_basic.glsl");
+				"res/shaders/fs_basic.glsl",
+				vas);
 
 		mat1.setTexture("res/textures/tex1.jpg");
 
@@ -92,7 +96,8 @@ public class Main
 
 		Material mat2 = new Material(
 				"res/shaders/vs_basic.glsl",
-				"res/shaders/fs_basic.glsl");
+				"res/shaders/fs_basic.glsl",
+				vas);
 
 		mat2.setTexture("res/textures/tex2.jpg");
 
