@@ -6,19 +6,23 @@ import org.lwjgl.BufferUtils;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 import static org.lwjgl.opengl.GL33.*;
 
 public class Renderer
 {
 	private Window window;
-	private ArrayList<Matrix4f> stack;
 	private Camera camera;
 
 	public Renderer(Window window, Camera camera)
 	{
 		this.camera = camera;
 		this.window = window;
+
+		this.meshQueue = new ArrayList<>(1024);
 
 		initGL();
 	}
@@ -28,23 +32,13 @@ public class Renderer
 		//System.out.println(glGetString(GL_RENDERER));
 
 		glEnable(GL_DEPTH_TEST);
-		glClearColor(0.3f, 0.3f, 0.3f, 0);
+		glClearColor(0.0f, 0.0f, 0.0f, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
-
-	private void dfs(Node node)
-	{
-		if (node instanceof Mesh)
-			draw((Mesh) node);
-
-		for (Node child : node.getChildren()) {
-			dfs(child);
-		}
 	}
 
 	private FloatBuffer MVPBuffer = BufferUtils.createFloatBuffer(16);
 
-	private void draw(Mesh mesh)
+	private void renderMesh(Mesh mesh)
 	{
 		Matrix4f model = mesh.renderTransform;
 		viewProj.mul(model, model).get(MVPBuffer);
@@ -68,10 +62,21 @@ public class Renderer
 		camera.renderTransform.invert(view);
 		proj.mul(view, viewProj);
 
-		dfs(treeRoot);
+		drawQueue();
 
 		window.swapBuffers();
 	}
+
+	private List<Mesh> meshQueue;
+
+	private void drawQueue()
+	{
+		for (Mesh mesh: meshQueue)
+			renderMesh(mesh);
+
+		meshQueue.clear();
+	}
+
 
 	private void calculateWorldTransforms(Node node, Matrix4f prev)
 	{
@@ -83,6 +88,10 @@ public class Renderer
 			Matrix4f localTransform = spatial.getTransform();
 
 			cur = prev.mul(localTransform, spatial.renderTransform);
+
+			if (node instanceof Mesh)
+				meshQueue.add((Mesh) node);
+
 		}
 
 		for (Node child : node.getChildren())

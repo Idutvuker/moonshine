@@ -48,7 +48,7 @@ public class ModelLoader
 		System.out.println("NumFaces: " + aiMesh.mNumFaces());
 
 		VertexDataType[] vdt  = new VertexDataType[] {
-				VertexDataType.POSITION, VertexDataType.TEXCOORD,
+				VertexDataType.POSITION, VertexDataType.NORMAL,
 		};
 
 		VertexAttribSetup vas = new VertexAttribSetup(vdt);
@@ -79,8 +79,8 @@ public class ModelLoader
 		//System.out.println(Arrays.toString(indices));
 
 		Material mat1 = new Material(
-				"res/shaders/vs_basic.glsl",
-				"res/shaders/fs_basic.glsl",
+				"res/shaders/vs_normals.glsl",
+				"res/shaders/fs_normals.glsl",
 				vas);
 
 		return new Mesh(aiMesh.mNumVertices(), verticesData, indices, mat1);
