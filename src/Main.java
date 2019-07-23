@@ -1,6 +1,4 @@
 import common.*;
-
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import system.Mouselook;
@@ -9,10 +7,8 @@ import system.Timer;
 import util.ModelLoader;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL33.*;
 
 public class Main
 {
@@ -115,6 +111,7 @@ public class Main
 						-1.0f, 0.0f, -1.0f, 0.0f, 0.0f};
 
 		int[] indices = {0, 1, 2, 0, 3, 1};
+
 
 		Mesh[] meshes = ModelLoader.load("res/models/monkey.obj");
 		root.addChild(meshes[0]);

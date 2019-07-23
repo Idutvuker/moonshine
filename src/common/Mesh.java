@@ -55,7 +55,7 @@ public class Mesh extends Spatial
 			if (attr.skip)
 				continue;
 
-			glVertexAttribPointer(i, attr.size, attr.type, false, attr.stride, attr.offset);
+			glVertexAttribPointer(i, attr.size, attr.glType, false, attr.strideBytes, attr.offsetBytes);
 			glEnableVertexAttribArray(i);
 		}
 

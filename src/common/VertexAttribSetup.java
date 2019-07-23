@@ -1,5 +1,6 @@
 package common;
 
+import sun.security.util.ArrayUtil;
 import util.GLTypeSizes;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -8,39 +9,28 @@ public class VertexAttribSetup
 {
 	public class Attrib
 	{
-		public boolean skip = false;
 		public int size;
-		public int type = GL_FLOAT;
-		public int stride;
-		public int offset;
+		public int glType = GL_FLOAT;
 
-		public String name = "Undefined";
+		public VertexDataType dataType;
 
-		public Attrib() {}
+		public Attrib(VertexDataType dataType)
+		{
+			this.dataType = dataType;
+			glType = dataType.glType;
+			size = dataType.size;
+		}
 
 		public Attrib(int size) {
 			this.size = size;
 		}
 
-		public Attrib(int size, int type) {
-			this.size = size;
-			this.type = type;
-		}
+		public boolean skip = false;
 
-		public Attrib(int size, int type, String name)
-		{
-			this.size = size;
-			this.type = type;
-			this.name = name;
-		}
-
-
-		@Override
-		public String toString() {
-			return name + ": " + size + " bytes";
-		}
+		//TODO strides and offsets should be stored in VertexAttribSetup
+		public int strideBytes;
+		public int offsetBytes;
 	}
-
 
 	private Attrib[] attribs;
 
@@ -49,19 +39,29 @@ public class VertexAttribSetup
 		int offset = 0;
 		for (Attrib attrib : attribs)
 		{
-			attrib.offset = offset;
+			attrib.offsetBytes = offset;
 
-			offset += attrib.size * GLTypeSizes.sizeof(attrib.type);
+			offset += attrib.size * GLTypeSizes.sizeof(attrib.glType);
 		}
 
 		int stride = offset;
 		for (Attrib attrib : attribs)
-			attrib.stride = stride;
+			attrib.strideBytes = stride;
 	}
 
 	public VertexAttribSetup(Attrib[] attribs)
 	{
 		this.attribs = attribs;
+
+		fillSetup();
+	}
+
+	public VertexAttribSetup(VertexDataType[] dataTypes)
+	{
+		attribs = new Attrib[dataTypes.length];
+
+		for (int i = 0; i < dataTypes.length; i++)
+			attribs[i] = new Attrib(dataTypes[i]);
 
 		fillSetup();
 	}
@@ -75,9 +75,13 @@ public class VertexAttribSetup
 		fillSetup();
 	}
 
-	public void setAttrib(int attrib, int size)
+	public int getSize()
 	{
-		attribs[attrib].size = size;
+		int size = 0;
+		for (Attrib attr: attribs)
+			size += attr.size;
+
+		return size;
 	}
 
 	public Attrib[] getSetup()
