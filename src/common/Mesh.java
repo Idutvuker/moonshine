@@ -1,7 +1,6 @@
 package common;
 
 import org.lwjgl.BufferUtils;
-import util.GLTypeSizes;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -10,38 +9,28 @@ import static org.lwjgl.opengl.GL33.*;
 
 public class Mesh extends Spatial
 {
-	private int verticesCount;
 	private FloatBuffer verticesBuffer;
 	private IntBuffer indicesBuffer;
-	private Material material;
+	private BaseMaterial material;
 
-	private int vaoID;
-	private int vboID;
-	private int iboID;
+	private GLObject glObject;
 
-	public Mesh(int verticesCount, float[] verticesData, int[] indices, Material material)
+	private void initGLObject(int verticesCount)
 	{
-		this.verticesCount = verticesCount;
-		this.material = material;
+		glObject = new GLObject();
+		glObject.verticesCount = verticesCount;
 
-		verticesBuffer = BufferUtils.createFloatBuffer(verticesData.length);
-		verticesBuffer.put(verticesData);
-		verticesBuffer.flip();
+		glObject.vboID = glGenBuffers();
+		glObject.iboID = glGenBuffers();
+		glObject.vaoID = glGenVertexArrays();
 
-		indicesBuffer = BufferUtils.createIntBuffer(indices.length);
-		indicesBuffer.put(indices);
-		indicesBuffer.flip();
 
-		vboID = glGenBuffers();
-		iboID = glGenBuffers();
-		vaoID = glGenVertexArrays();
+		glBindVertexArray(glObject.vaoID);
 
-		glBindVertexArray(vaoID);
-
-		glBindBuffer(GL_ARRAY_BUFFER, vboID);
+		glBindBuffer(GL_ARRAY_BUFFER, glObject.vboID);
 		glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboID);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glObject.iboID);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
 
 		//material.use();
@@ -59,41 +48,45 @@ public class Mesh extends Spatial
 			glEnableVertexAttribArray(i);
 		}
 
-		//Vertex texture coords
-		//glVertexAttribPointer(1, 2, GL_FLOAT, false, 20, 12);
-		//glEnableVertexAttribArray(1);
-
-
 		//Unbinding
 		glBindVertexArray(0);
-
 	}
 
-
-	public void draw(FloatBuffer MVPBuffer)
+	public Mesh(int verticesCount, float[] verticesData, int[] indices, BaseMaterial material)
 	{
+		verticesBuffer = BufferUtils.createFloatBuffer(verticesData.length);
+		verticesBuffer.put(verticesData);
+		verticesBuffer.flip();
 
-		//float[] arr = new float[16];
-		//MVPbuffer.get(arr);
-		//MVPbuffer.flip();
+		indicesBuffer = BufferUtils.createIntBuffer(indices.length);
+		indicesBuffer.put(indices);
+		indicesBuffer.flip();
 
-		//System.out.println(Arrays.toString(arr));
-		//System.out.println(MVPmat.toString());
+		this.material = material;
 
-		material.use();
-		material.setMVP(MVPBuffer);
-
-		glBindVertexArray(vaoID);
-		//System.out.println("Drawing V: " + verticesCount);
-
-		glDrawElements(GL_TRIANGLES, verticesCount, GL_UNSIGNED_INT, 0);
-		//System.out.println("Finished!");
-		glBindVertexArray(0);
-
-
+		initGLObject(verticesCount);
 	}
 
-	public int getVaoID() {
-		return vaoID;
+
+	public Mesh(int verticesCount, FloatBuffer verticesData, IntBuffer indices, BaseMaterial material)
+	{
+		verticesBuffer = verticesData;
+		indicesBuffer = indices;
+
+		this.material = material;
+
+		initGLObject(verticesCount);
+	}
+
+
+	public void draw()
+	{
+		glBindVertexArray(glObject.vaoID);
+		glDrawElements(GL_TRIANGLES, glObject.verticesCount, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+	}
+
+	public BaseMaterial getMaterial(){
+		return material;
 	}
 }

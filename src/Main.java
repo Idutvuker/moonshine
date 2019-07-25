@@ -79,9 +79,9 @@ public class Main
 		int[] sizes = {3, 2};
 		VertexAttribSetup vas = new VertexAttribSetup(sizes);
 
-		Material mat1 = new Material(
-				"res/shaders/vs_basic.glsl",
-				"res/shaders/fs_basic.glsl",
+		BaseMaterial mat1 = new BaseMaterial(
+				"res/shaders/basic_vs.glsl",
+				"res/shaders/basic_fs.glsl",
 				vas);
 
 		mat1.setTexture("res/textures/tex1.jpg");
@@ -90,9 +90,9 @@ public class Main
 		mesh1.setPosition(new Vector3f(0, 0, -3.f));
 		root.addChild(mesh1);
 
-		Material mat2 = new Material(
-				"res/shaders/vs_basic.glsl",
-				"res/shaders/fs_basic.glsl",
+		BaseMaterial mat2 = new BaseMaterial(
+				"res/shaders/basic_vs.glsl",
+				"res/shaders/basic_fs.glsl",
 				vas);
 
 		mat2.setTexture("res/textures/tex2.jpg");
@@ -110,8 +110,8 @@ public class Main
 						1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
 						-1.0f, 0.0f, -1.0f, 0.0f, 0.0f};
 
-		int[] indices = {0, 1, 2, 0, 3, 1};
 
+		int[] indices = {0, 1, 2, 0, 3, 1};
 
 		Mesh[] meshes = ModelLoader.load("res/models/monkey.obj");
 		root.addChild(meshes[0]);
@@ -166,12 +166,6 @@ public class Main
 	{
 		if (window.isKeyPressed(GLFW_KEY_SPACE))
 			mesh1.getTransform().rotateZ(delta);
-
-		if (window.isKeyPressed(GLFW_KEY_UP))
-			mesh2.translate(0, delta, 0);
-
-		if (window.isKeyPressed(GLFW_KEY_DOWN))
-			mesh2.getTransform().rotateZ(delta);
 	}
 
 	private void quit()
