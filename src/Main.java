@@ -1,4 +1,5 @@
 import common.*;
+import materials.SimpleMaterial;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import system.Mouselook;
@@ -17,7 +18,7 @@ public class Main
 		new Main().run();
 	}
 
-	public void run()
+	private void run()
 	{
 		init();
 		loop();
@@ -61,9 +62,9 @@ public class Main
 	private void initMeshes()
 	{
 		float[] vertices1 = {
-				-0.5f, 0.5f, 0f,    -0.5f, 0.5f,
-				-0.5f, -0.5f, 0f,   -0.5f, -0.5f,
-				0.5f, -0.5f, 0f,    0.5f, -0.5f,
+				-0.5f, 0.5f, 0f,	0.0f, 0.0f, 1.0f,	-0.5f, 0.5f,
+				-0.5f, -0.5f, 0f,   0.0f, 0.0f, 1.0f,	-0.5f, -0.5f,
+				0.5f, -0.5f, 0f,    0.0f, 0.0f, 1.0f,	0.5f, -0.5f,
 		};
 
 		int[] indices1 = {
@@ -71,18 +72,12 @@ public class Main
 		};
 
 		float[] vertices2 = {
-				0.3f, 0.5f, 0f,    -0.5f, 0.5f,
-				0.5f, -0.3f, 0f,   -0.5f, -0.5f,
-				0.5f, 0.5f, 0f,    0.5f, -0.5f,
+				0.3f, 0.5f, 0f,    0.0f, 0.0f, 1.0f,	-0.5f, 0.5f,
+				0.5f, -0.3f, 0f,   0.0f, 0.0f, 1.0f,	-0.5f, -0.5f,
+				0.5f, 0.5f, 0f,    0.0f, 0.0f, 1.0f,	0.5f, -0.5f,
 		};
 
-		int[] sizes = {3, 2};
-		VertexAttribSetup vas = new VertexAttribSetup(sizes);
-
-		BaseMaterial mat1 = new BaseMaterial(
-				"res/shaders/basic_vs.glsl",
-				"res/shaders/basic_fs.glsl",
-				vas);
+		BaseMaterial mat1 = new SimpleMaterial();
 
 		mat1.setTexture("res/textures/tex1.jpg");
 
@@ -90,10 +85,7 @@ public class Main
 		mesh1.setPosition(new Vector3f(0, 0, -3.f));
 		root.addChild(mesh1);
 
-		BaseMaterial mat2 = new BaseMaterial(
-				"res/shaders/basic_vs.glsl",
-				"res/shaders/basic_fs.glsl",
-				vas);
+		BaseMaterial mat2 = new SimpleMaterial();
 
 		mat2.setTexture("res/textures/tex2.jpg");
 
@@ -101,20 +93,10 @@ public class Main
 		mesh2.setPosition(new Vector3f(0, 2.0f, 0.f));
 		mesh1.addChild(mesh2);
 
-
-		float[] verts = {1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-						-1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-						-1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-
-						1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-						1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-						-1.0f, 0.0f, -1.0f, 0.0f, 0.0f};
-
-
-		int[] indices = {0, 1, 2, 0, 3, 1};
-
 		Mesh[] meshes = ModelLoader.load("res/models/monkey.obj");
-		root.addChild(meshes[0]);
+
+		for (Mesh m: meshes)
+			mesh1.addChild(m);
 	}
 
 

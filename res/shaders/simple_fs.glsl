@@ -1,15 +1,25 @@
 #version 330 core
 
-in vec3 fs_normal;
+in VS_OUT
+{
+    vec3 FragPos;
+    vec3 Normal;
+    vec2 TexCoord;
+} fs_in;
 
-out vec4 color;
+out vec4 FragColor;
 
-const vec3 light_dir = normalize(vec3(1, 1, 1));
+uniform vec4 uf_color = vec4(1.f);
+
+uniform vec3 light_pos = vec3(5.0, 10.0, 4.0);
 
 void main()
 {
-    float ambient = 0.1;
-    float diffuse = max(dot(fs_normal, light_dir), 0);
 
-    color = vec4(vec3(ambient + diffuse), 1.f);
+    vec3 light_dir = normalize(light_pos);
+
+    float ambient = 0.1;
+    float diffuse = max(dot(normalize(fs_in.Normal), light_dir), 0.0);
+
+    FragColor = vec4(vec3(ambient + diffuse), 1.0f);
 }

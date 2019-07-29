@@ -1,8 +1,5 @@
 package common;
 
-import org.joml.Vector3f;
-import org.joml.sampling.UniformSampling;
-
 import java.nio.FloatBuffer;
 import java.util.BitSet;
 
@@ -10,17 +7,6 @@ import static org.lwjgl.opengl.GL33.*;
 
 public class BaseMaterial
 {
-	public class Uniform
-	{
-		public static final int MODELVIEWPROJECTION = 	0b1;
-		public static final int MODEL = 				0b10;
-		public static final int VIEW = 					0b100;
-		public static final int PROJECTION = 			0b1000;
-		public static final int MODELVIEW = 			0b10000;
-		public static final int SMOOTHSHADING = 		0b100000;
-		public static final int COLOR = 				0b1000000;
-	}
-
 	protected BitSet uniformBitSet = new BitSet(32);
 
 	public boolean usesUniform(int uniformBit)
@@ -30,7 +16,13 @@ public class BaseMaterial
 
 	private ShaderProgram shaderProgram;
 	private Texture texture;
-	VertexAttribSetup vertexAttribSetup;
+
+	private VertexDataType[] vertexAttribs;
+	private VertexAttribSetup vertexAttribSetup;
+
+	public VertexAttribSetup getVertexAttribSetup() {
+		return vertexAttribSetup;
+	}
 
 	public void createShaderProgram(String vertexShaderFilename, String fragmentShaderFilename)
 	{
@@ -48,7 +40,7 @@ public class BaseMaterial
 						VertexAttribSetup vertexAttribSetup)
 	{
 		this.vertexAttribSetup = vertexAttribSetup;
-		uniformBitSet.set(Uniform.MODELVIEWPROJECTION);
+		uniformBitSet.set(Uniform.MODEL_VIEW_PROJECTION);
 
 		createShaderProgram(vertexShaderFilename, fragmentShaderFilename);
 	}
@@ -76,8 +68,6 @@ public class BaseMaterial
 
 		shaderProgram.use();
 	}
-
-
 
 
 

@@ -35,14 +35,14 @@ public class Mesh extends Spatial
 
 		//material.use();
 
-		VertexAttribSetup.Attrib[] setup = material.vertexAttribSetup.getSetup();
+		VertexAttribSetup setup = material.getVertexAttribSetup();
 
-		for (int i = 0; i < setup.length; i++)
+		for (int i = 0; i < setup.getSize(); i++)
 		{
-			VertexAttribSetup.Attrib attr = setup[i];
+			VertexAttribSetup.LockedAttrib attr = setup.getAttr(i);
 
-			if (attr.skip)
-				continue;
+			//if (attr.skip)
+			//	continue;
 
 			glVertexAttribPointer(i, attr.size, attr.glType, false, attr.strideBytes, attr.offsetBytes);
 			glEnableVertexAttribArray(i);

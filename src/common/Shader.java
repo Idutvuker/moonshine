@@ -3,6 +3,9 @@ package common;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import static org.lwjgl.opengl.GL33.*;
 
@@ -18,6 +21,7 @@ public class Shader
 		{
 			BufferedReader reader = new BufferedReader(new FileReader(filename));
 			String line;
+
 			while ((line = reader.readLine()) != null)
 				shaderSource.append(line).append("\n");
 
@@ -30,6 +34,7 @@ public class Shader
 		}
 
 		shaderID = glCreateShader(type);
+
 		glShaderSource(shaderID, shaderSource);
 		glCompileShader(shaderID);
 

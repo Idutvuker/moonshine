@@ -3,8 +3,10 @@ package util;
 
 import common.BaseMaterial;
 import common.Mesh;
-import common.VertexAttribSetup;
 import common.VertexDataType;
+import javafx.scene.paint.Material;
+import materials.SimpleMaterial;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.AIFace;
@@ -14,12 +16,28 @@ import org.lwjgl.assimp.AIVector3D;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.Arrays;
-import java.util.BitSet;
 
-import static org.lwjgl.assimp.Assimp.*;
+import static org.lwjgl.assimp.Assimp.AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
+import static org.lwjgl.assimp.Assimp.aiImportFile;
 
-public class ModelLoader {
+public class ModelLoader
+{
+	private static class MeshVertex
+	{
+		public float posX;
+		public float posY;
+		public float posZ;
+
+
+		public float normalX;
+		public float normalY;
+		public float normalZ;
+
+
+		public float texCoordX;
+		public float texCoordY;
+	}
+
 	public static Mesh[] load(String resourcePath) {
 		AIScene aiScene = aiImportFile(resourcePath, AI_SCENE_FLAGS_NON_VERBOSE_FORMAT);
 
@@ -34,7 +52,8 @@ public class ModelLoader {
 
 		Mesh[] meshes = new Mesh[numMeshes];
 
-		for (int i = 0; i < numMeshes; i++) {
+		for (int i = 0; i < numMeshes; i++)
+		{
 			AIMesh aiMesh = AIMesh.create(aiMeshes.get());
 			meshes[i] = processMesh(aiMesh);
 		}
@@ -42,69 +61,93 @@ public class ModelLoader {
 		return meshes;
 	}
 
-	private static Mesh processMesh(AIMesh aiMesh) {
+
+	private static Mesh processMesh(AIMesh aiMesh)
+	{
 		System.out.println("NumVertices: " + aiMesh.mNumVertices());
 		System.out.println("NumFaces: " + aiMesh.mNumFaces());
 
-		VertexDataType[] vdt = new VertexDataType[]{
-				VertexDataType.POSITION, VertexDataType.NORMAL,
-		};
+		BaseMaterial mat1 = new SimpleMaterial();
+		VertexDataType[] attribs = SimpleMaterial.attribs;
 
-		VertexAttribSetup vas = new VertexAttribSetup(vdt);
-
-		//int stride = vas.getSize();
-		//int offset = 0;
-
-		//float[] verticesData = new float[stride * aiMesh.mNumVertices()];
-
-		AIVector3D.Buffer[] buffers = new AIVector3D.Buffer[vdt.length];
-		for (int i = 0; i < vdt.length; i++) {
-			if (vdt[i] == VertexDataType.POSITION)
-				buffers[i] = aiMesh.mVertices();
-
-			else if (vdt[i] == VertexDataType.NORMAL)
-				buffers[i] = aiMesh.mNormals();
-
-			else if (vdt[i] == VertexDataType.TEXCOORD)
-				buffers[i] = aiMesh.mTextureCoords(0);
-		}
-
-		FloatBuffer verticesData = BufferUtils.createFloatBuffer(vas.getSize() * aiMesh.mNumVertices());
+		MeshVertex[] vertices = new MeshVertex[aiMesh.mNumVertices()];
 		for (int i = 0; i < aiMesh.mNumVertices(); i++)
+			vertices[i] = new MeshVertex();
+
+		for (VertexDataType vdt: attribs)
 		{
-			for (int j = 0; j < vdt.length; j++) {
-				if (vdt[j] == VertexDataType.POSITION)
-					processVertex(buffers[j], verticesData);
+			if (vdt == VertexDataType.POSITION)
+				processVertices(aiMesh, vertices);
 
-				else if (vdt[j] == VertexDataType.NORMAL)
-					processNormal(buffers[j], verticesData);
+			else if (vdt == VertexDataType.NORMAL)
+				processNormals(aiMesh, vertices);
 
-				else if (vdt[j] == VertexDataType.TEXCOORD)
-					processTexCoord(buffers[j], verticesData);
-			}
+			else if (vdt == VertexDataType.TEXCOORD)
+				processTexCoords(aiMesh, vertices);
 		}
-		verticesData.flip();
 
 
 		IntBuffer indices = BufferUtils.createIntBuffer(aiMesh.mNumFaces() * 3);
-		processIndices(aiMesh, indices);
+		processIndices(aiMesh, indices, vertices, aiMesh.mNormals() == null);
 		indices.flip();
 
-		BitSet bs = new BitSet(32);
-		bs.set(BaseMaterial.Uniform.MODELVIEWPROJECTION);
-		bs.set(BaseMaterial.Uniform.MODEL);
-		BaseMaterial mat1 = new BaseMaterial(
-				"res/shaders/normals_vs.glsl",
-				"res/shaders/normals_fs.glsl",
-				vas,
-				bs);
+
+		int size = SimpleMaterial.attribSetup.getLayoutSize() * aiMesh.mNumVertices();
+		FloatBuffer verticesData = BufferUtils.createFloatBuffer(size);
+
+
+		for (MeshVertex vertex: vertices)
+		{
+			for (VertexDataType vdt: attribs)
+			{
+				if (vdt == VertexDataType.POSITION)
+				{
+					verticesData.put(vertex.posX);
+					verticesData.put(vertex.posY);
+					verticesData.put(vertex.posZ);
+				}
+
+				else if (vdt == VertexDataType.NORMAL)
+				{
+					verticesData.put(vertex.normalX);
+					verticesData.put(vertex.normalY);
+					verticesData.put(vertex.normalZ);
+				}
+
+				else if (vdt == VertexDataType.TEXCOORD)
+				{
+					verticesData.put(vertex.texCoordX);
+					verticesData.put(vertex.texCoordY);
+				}
+			}
+		}
+
+		verticesData.flip();
 
 		return new Mesh(aiMesh.mNumVertices(), verticesData, indices, mat1);
 	}
 
-	private static void processIndices(AIMesh aiMesh, IntBuffer indices) {
-		AIFace.Buffer aiFaces = aiMesh.mFaces();
+	private static Vector3f vec1 = new Vector3f();
+	private static Vector3f vec2 = new Vector3f();
 
+	private static void calculateNormal(MeshVertex v1, MeshVertex v2, MeshVertex v3)
+	{
+		vec1.set(v2.posX - v1.posX, v2.posY - v1.posY, v2.posZ - v1.posZ);
+		vec2.set(v3.posX - v1.posX, v3.posY - v1.posY, v3.posZ - v1.posZ);
+
+		vec1.cross(vec2).normalize();
+		System.out.println(vec1);
+
+		v1.normalX = vec1.x; v1.normalY = vec1.y; v1.normalZ = vec1.z;
+		v2.normalX = vec1.x; v2.normalY = vec1.y; v2.normalZ = vec1.z;
+		v3.normalX = vec1.x; v3.normalY = vec1.y; v3.normalZ = vec1.z;
+	}
+
+
+	private static void processIndices(AIMesh aiMesh, IntBuffer indices,
+									   MeshVertex[] vertices, boolean calcNormals)
+	{
+		AIFace.Buffer aiFaces = aiMesh.mFaces();
 
 		for (int i = 0; i < aiFaces.limit(); i++)
 		{
@@ -112,98 +155,68 @@ public class ModelLoader {
 			IntBuffer indBuff = aiFaces.get().mIndices();
 
 			if (indBuff.limit() != 3)
-				System.err.println("Face is not a triangle!" + aiMesh.toString());
+				System.err.println("Face is not a triangle! " + aiMesh.toString());
 
-			indices.put(indBuff.get(0));
-			indices.put(indBuff.get(1));
-			indices.put(indBuff.get(2));
+			int v1_ind = indBuff.get();
+			int v2_ind = indBuff.get();
+			int v3_ind = indBuff.get();
+
+			indices.put(v1_ind);
+			indices.put(v2_ind);
+			indices.put(v3_ind);
+
+			if (calcNormals)
+				calculateNormal(vertices[v1_ind], vertices[v2_ind], vertices[v3_ind]);
 		}
 	}
 
 
-	private static void processVertex(AIVector3D.Buffer buffer, FloatBuffer data)
-	{
-		AIVector3D aiVertex = buffer.get();
-		data.put(aiVertex.x());
-		data.put(aiVertex.y());
-		data.put(aiVertex.z());
-	}
-
-	private static void processNormal(AIVector3D.Buffer buffer, FloatBuffer data)
-	{
-		AIVector3D aiVertex = buffer.get();
-		data.put(aiVertex.x());
-		data.put(aiVertex.y());
-		data.put(aiVertex.z());
-	}
-
-	private static void processTexCoord(AIVector3D.Buffer buffer, FloatBuffer data)
-	{
-		AIVector3D aiVertex = buffer.get();
-		data.put(aiVertex.x());
-		data.put(aiVertex.y());
-	}
-
-
-	private static boolean processVertices(AIMesh aiMesh, float[] data, int stride, int offset)
+	private static boolean processVertices(AIMesh aiMesh, MeshVertex[] vertices)
 	{
 		AIVector3D.Buffer buffer = aiMesh.mVertices();
-
-		if (buffer == null)
-		{
-			//System.err.println("Couldn't load vertices on " + aiMesh);
-			return false;
-		}
 
 		for (int i = 0; i < buffer.limit(); i++)
 		{
 			AIVector3D aiVertex = buffer.get();
-			data[i * stride + offset] = aiVertex.x();
-			data[i * stride + offset + 1] = aiVertex.y();
-			data[i * stride + offset + 2] = aiVertex.z();
+			vertices[i].posX = aiVertex.x();
+			vertices[i].posY = aiVertex.y();
+			vertices[i].posZ = aiVertex.z();
 		}
 
 		return true;
 	}
 
-	private static boolean processNormals(AIMesh aiMesh, float[] data, int stride, int offset)
+	private static boolean processNormals(AIMesh aiMesh, MeshVertex[] vertices)
 	{
 		AIVector3D.Buffer buffer = aiMesh.mNormals();
 
 		if (buffer == null)
-		{
-			//System.err.println("Couldn't load normals coords on " + aiMesh);
 			return false;
-		}
 
 		for (int i = 0; i < buffer.limit(); i++)
 		{
 			AIVector3D aiVertex = buffer.get();
-			data[i * stride + offset] = aiVertex.x();
-			data[i * stride + offset + 1] = aiVertex.y();
-			data[i * stride + offset + 2] = aiVertex.z();
+			vertices[i].normalX = aiVertex.x();
+			vertices[i].normalY = aiVertex.y();
+			vertices[i].normalZ = aiVertex.z();
 		}
 
 		return true;
 	}
 
-	private static boolean processTexCoords(AIMesh aiMesh, float[] data, int stride, int offset)
+	private static boolean processTexCoords(AIMesh aiMesh, MeshVertex[] vertices)
 	{
 		AIVector3D.Buffer buffer = aiMesh.mTextureCoords(0);
 
 		if (buffer == null)
-		{
-			//System.err.println("Couldn't load texture coords on " + aiMesh);
 			return false;
-		}
 
 		for (int i = 0; i < buffer.limit(); i++)
 		{
 			AIVector3D aiVertex = buffer.get();
 
-			//Only 2D texture coords are used
-			data[i * stride + offset] = aiVertex.x();
-			data[i * stride + offset + 1] = aiVertex.y();
+			vertices[i].texCoordX = aiVertex.x();
+			vertices[i].texCoordY = aiVertex.y();
 		}
 
 		return true;

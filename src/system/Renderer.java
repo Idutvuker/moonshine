@@ -28,6 +28,8 @@ public class Renderer
 	{
 		//System.out.println(glGetString(GL_RENDERER));
 
+		glCullFace(GL_BACK);
+		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(0.0f, 0.0f, 0.0f, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -43,22 +45,22 @@ public class Renderer
 
 		Matrix4f model = mesh.renderTransform;
 
-		if (mat.usesUniform(BaseMaterial.Uniform.MODEL))
+		if (mat.usesUniform(Uniform.MODEL))
 			mat.setMatrix4f("uf_ModelMat", model.get(MatBuffer));
 
-		if (mat.usesUniform(BaseMaterial.Uniform.VIEW))
+		if (mat.usesUniform(Uniform.VIEW))
 			mat.setMatrix4f("uf_ViewMat", view.get(MatBuffer));
 
-		if (mat.usesUniform(BaseMaterial.Uniform.PROJECTION))
+		if (mat.usesUniform(Uniform.PROJECTION))
 			mat.setMatrix4f("uf_ProjectionMat", proj.get(MatBuffer));
 
-		if (mat.usesUniform(BaseMaterial.Uniform.MODELVIEW))
+		if (mat.usesUniform(Uniform.MODEL_VIEW))
 		{
 			view.mul(model, tMat);
 			mat.setMatrix4f("uf_ModelViewMat", tMat.get(MatBuffer));
 		}
 
-		if (mat.usesUniform(BaseMaterial.Uniform.MODELVIEWPROJECTION))
+		if (mat.usesUniform(Uniform.MODEL_VIEW_PROJECTION))
 		{
 			viewProj.mul(model, tMat);
 			mat.setMVP(tMat.get(MatBuffer));

@@ -1,91 +1,72 @@
 package common;
 
-import sun.security.util.ArrayUtil;
 import util.GLTypeSizes;
-
-import static org.lwjgl.opengl.GL11.*;
 
 public class VertexAttribSetup
 {
-	public class Attrib
+	class LockedAttrib
 	{
-		public int size;
-		public int glType = GL_FLOAT;
+		public final int size;
+		public final int glType;
+		public final int strideBytes;
+		public final int offsetBytes;
 
-		public VertexDataType dataType;
-
-		public Attrib(VertexDataType dataType)
-		{
-			this.dataType = dataType;
-			glType = dataType.glType;
-			size = dataType.size;
-		}
-
-		public Attrib(int size) {
+		private LockedAttrib(int size, int glType, int strideBytes, int offsetBytes) {
 			this.size = size;
+			this.glType = glType;
+			this.strideBytes = strideBytes;
+			this.offsetBytes = offsetBytes;
 		}
-
-		public boolean skip = false;
-
-		//TODO strides and offsets should be stored in VertexAttribSetup
-		public int strideBytes;
-		public int offsetBytes;
 	}
 
-	private Attrib[] attribs;
+	private LockedAttrib[] setup;
 
-	private void fillSetup()
+	public int getSize() {
+		return setup.length;
+	}
+
+	public LockedAttrib getAttr(int index)
 	{
+		return setup[index];
+	}
+
+	private void fillSetup(BaseAttrib[] attribs)
+	{
+		setup = new LockedAttrib[attribs.length];
+
+		int stride = 0;
+		for (int i = 0; i < attribs.length; i++)
+			stride += attribs[i].size * GLTypeSizes.sizeof(attribs[i].glType);
+
 		int offset = 0;
-		for (Attrib attrib : attribs)
-		{
-			attrib.offsetBytes = offset;
 
-			offset += attrib.size * GLTypeSizes.sizeof(attrib.glType);
+		for (int i = 0; i < attribs.length; i++) {
+			setup[i] = new LockedAttrib(attribs[i].size, attribs[i].glType, stride, offset);
+			offset += attribs[i].size * GLTypeSizes.sizeof(attribs[i].glType);
 		}
-
-		int stride = offset;
-		for (Attrib attrib : attribs)
-			attrib.strideBytes = stride;
 	}
 
-	public VertexAttribSetup(Attrib[] attribs)
+	public VertexAttribSetup(BaseAttrib[] attribs)
 	{
-		this.attribs = attribs;
-
-		fillSetup();
+		fillSetup(attribs);
 	}
 
 	public VertexAttribSetup(VertexDataType[] dataTypes)
 	{
-		attribs = new Attrib[dataTypes.length];
+		BaseAttrib[] attribs = new BaseAttrib[dataTypes.length];
 
 		for (int i = 0; i < dataTypes.length; i++)
-			attribs[i] = new Attrib(dataTypes[i]);
+			attribs[i] = new BaseAttrib(dataTypes[i]);
 
-		fillSetup();
+		fillSetup(attribs);
 	}
 
-	public VertexAttribSetup(int[] attribSizes)
-	{
-		attribs = new Attrib[attribSizes.length];
-		for (int i = 0; i < attribSizes.length; i++)
-			attribs[i] = new Attrib(attribSizes[i]);
-
-		fillSetup();
-	}
-
-	public int getSize()
+	public int getLayoutSize()
 	{
 		int size = 0;
-		for (Attrib attr: attribs)
+		for (LockedAttrib attr: setup)
 			size += attr.size;
 
 		return size;
-	}
-
-	public Attrib[] getSetup()
-	{
-		return attribs;
 	}
 }
