@@ -1,5 +1,7 @@
 package common;
 
+import com.sun.istack.internal.Nullable;
+
 import java.nio.FloatBuffer;
 import java.util.BitSet;
 
@@ -17,22 +19,28 @@ public class BaseMaterial
 	private ShaderProgram shaderProgram;
 	private Texture texture;
 
-	private VertexDataType[] vertexAttribs;
-	private VertexAttribSetup vertexAttribSetup;
+	protected VertexDataType[] vertexAttribData;
+	protected VertexAttribSetup vertexAttribSetup;
 
-	public VertexAttribSetup getVertexAttribSetup() {
-		return vertexAttribSetup;
-	}
-
-	public void createShaderProgram(String vertexShaderFilename, String fragmentShaderFilename)
+	protected void createShaderProgram(String vertexShaderFilename, String fragmentShaderFilename, CharSequence[] defines)
 	{
-		Shader vs = new Shader(vertexShaderFilename, GL_VERTEX_SHADER);
-		Shader fs = new Shader(fragmentShaderFilename, GL_FRAGMENT_SHADER);
+		Shader vs = new Shader(vertexShaderFilename, GL_VERTEX_SHADER, defines);
+		Shader fs = new Shader(fragmentShaderFilename, GL_FRAGMENT_SHADER, defines);
 
 		shaderProgram = new ShaderProgram(vs, fs);
 
 		vs.delete();
 		fs.delete();
+	}
+
+	protected BaseMaterial() {}
+
+	public BaseMaterial(BaseMaterial mat)
+	{
+		uniformBitSet = mat.uniformBitSet;
+		shaderProgram = mat.shaderProgram;
+		vertexAttribSetup = mat.vertexAttribSetup;
+		vertexAttribData = mat.vertexAttribData;
 	}
 
 	public BaseMaterial(String vertexShaderFilename,
@@ -42,18 +50,7 @@ public class BaseMaterial
 		this.vertexAttribSetup = vertexAttribSetup;
 		uniformBitSet.set(Uniform.MODEL_VIEW_PROJECTION);
 
-		createShaderProgram(vertexShaderFilename, fragmentShaderFilename);
-	}
-
-	public BaseMaterial(String vertexShaderFilename,
-						String fragmentShaderFilename,
-						VertexAttribSetup vertexAttribSetup,
-						BitSet uniforms)
-	{
-		this.vertexAttribSetup = vertexAttribSetup;
-		uniformBitSet = uniforms;
-
-		createShaderProgram(vertexShaderFilename, fragmentShaderFilename);
+		createShaderProgram(vertexShaderFilename, fragmentShaderFilename, null);
 	}
 
 	public void setTexture(String textureFilename)
@@ -68,6 +65,17 @@ public class BaseMaterial
 
 		shaderProgram.use();
 	}
+
+
+	public VertexAttribSetup getVertexAttribSetup() {
+		return vertexAttribSetup;
+	}
+
+
+	public VertexDataType[] getVertexAttribData() {
+		return vertexAttribData;
+	}
+
 
 
 

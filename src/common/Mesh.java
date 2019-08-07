@@ -9,16 +9,15 @@ import static org.lwjgl.opengl.GL33.*;
 
 public class Mesh extends Spatial
 {
-	private FloatBuffer verticesBuffer;
-	private IntBuffer indicesBuffer;
-	private BaseMaterial material;
+	protected FloatBuffer verticesBuffer;
+	protected IntBuffer indicesBuffer;
+	protected BaseMaterial material;
 
-	private GLObject glObject;
+	protected GLObject glObject = new GLObject();
 
-	private void initGLObject(int verticesCount)
+	protected void initGLObject()
 	{
-		glObject = new GLObject();
-		glObject.verticesCount = verticesCount;
+		glObject.verticesCount = indicesBuffer.limit();
 
 		glObject.vboID = glGenBuffers();
 		glObject.iboID = glGenBuffers();
@@ -52,7 +51,7 @@ public class Mesh extends Spatial
 		glBindVertexArray(0);
 	}
 
-	public Mesh(int verticesCount, float[] verticesData, int[] indices, BaseMaterial material)
+	public Mesh(float[] verticesData, int[] indices, BaseMaterial material)
 	{
 		verticesBuffer = BufferUtils.createFloatBuffer(verticesData.length);
 		verticesBuffer.put(verticesData);
@@ -64,18 +63,19 @@ public class Mesh extends Spatial
 
 		this.material = material;
 
-		initGLObject(verticesCount);
+		initGLObject();
 	}
 
+	protected Mesh() {}
 
-	public Mesh(int verticesCount, FloatBuffer verticesData, IntBuffer indices, BaseMaterial material)
+	public Mesh(FloatBuffer verticesData, IntBuffer indices, BaseMaterial material)
 	{
 		verticesBuffer = verticesData;
 		indicesBuffer = indices;
 
 		this.material = material;
 
-		initGLObject(verticesCount);
+		initGLObject();
 	}
 
 

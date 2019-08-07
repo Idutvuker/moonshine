@@ -6,29 +6,51 @@ import common.VertexAttribSetup;
 import common.VertexDataType;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.system.CallbackI;
 
 import java.nio.FloatBuffer;
 
 public class SimpleMaterial extends BaseMaterial
 {
-	public static final VertexDataType[] attribs = new VertexDataType[] {
-			VertexDataType.POSITION,
-			VertexDataType.NORMAL,
-			VertexDataType.TEXCOORD
-	};
-
-	public static final VertexAttribSetup attribSetup = new VertexAttribSetup(attribs);
-
-	public SimpleMaterial()
+	public class Flags
 	{
-		super(
-				"res/shaders/simple_vs.glsl",
-				"res/shaders/simple_fs.glsl",
-				attribSetup);
+		public static final int TEXTURED = 0b1;
+		public static final int SMOOTH = 0b10;
+	}
+
+
+
+	public SimpleMaterial() {
+		this(0);
+	}
+
+	public SimpleMaterial(int flags)
+	{
+		String[] defines = new String[Integer.bitCount(flags)];
+
+		int t = 0;
+
+		if ((flags & Flags.TEXTURED) != 0)
+			defines[t++] = "TEXTURED";
+
+		if ((flags & Flags.SMOOTH) != 0)
+			defines[t++] = "SMOOTH_SHADING";
+
+
+		createShaderProgram(
+				"res/shaders/simple.vert",
+				"res/shaders/simple.frag",
+				defines);
+
+		vertexAttribData = new VertexDataType[] {
+				VertexDataType.POSITION,
+				VertexDataType.NORMAL,
+				VertexDataType.TEXCOORD
+		};
+
+		vertexAttribSetup = new VertexAttribSetup(vertexAttribData);
 
 		uniformBitSet.set(Uniform.MODEL);
-		uniformBitSet.set(Uniform.VIEW);
+		uniformBitSet.set(Uniform.MODEL_VIEW_PROJECTION);
 	}
 
 

@@ -16,9 +16,9 @@ import org.lwjgl.assimp.AIVector3D;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 
-import static org.lwjgl.assimp.Assimp.AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
-import static org.lwjgl.assimp.Assimp.aiImportFile;
+import static org.lwjgl.assimp.Assimp.*;
 
 public class ModelLoader
 {
@@ -38,8 +38,10 @@ public class ModelLoader
 		public float texCoordY;
 	}
 
-	public static Mesh[] load(String resourcePath) {
-		AIScene aiScene = aiImportFile(resourcePath, AI_SCENE_FLAGS_NON_VERBOSE_FORMAT);
+	public static Mesh[] load(String resourcePath)
+	{
+		int flags = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices;
+		AIScene aiScene = aiImportFile(resourcePath, flags);
 
 		if (aiScene == null) {
 			System.err.println("Error loading model " + resourcePath);
@@ -68,7 +70,7 @@ public class ModelLoader
 		System.out.println("NumFaces: " + aiMesh.mNumFaces());
 
 		BaseMaterial mat1 = new SimpleMaterial();
-		VertexDataType[] attribs = SimpleMaterial.attribs;
+		VertexDataType[] attribs = mat1.getVertexAttribData();
 
 		MeshVertex[] vertices = new MeshVertex[aiMesh.mNumVertices()];
 		for (int i = 0; i < aiMesh.mNumVertices(); i++)
@@ -91,8 +93,13 @@ public class ModelLoader
 		processIndices(aiMesh, indices, vertices, aiMesh.mNormals() == null);
 		indices.flip();
 
+		int[] A = new int[indices.limit()];
+		indices.get(A);
+		indices.flip();
+		System.out.println(Arrays.toString(A));
 
-		int size = SimpleMaterial.attribSetup.getLayoutSize() * aiMesh.mNumVertices();
+
+		int size = mat1.getVertexAttribSetup().getLayoutSize() * aiMesh.mNumVertices();
 		FloatBuffer verticesData = BufferUtils.createFloatBuffer(size);
 
 
@@ -124,7 +131,7 @@ public class ModelLoader
 
 		verticesData.flip();
 
-		return new Mesh(aiMesh.mNumVertices(), verticesData, indices, mat1);
+		return new Mesh(verticesData, indices, mat1);
 	}
 
 	private static Vector3f vec1 = new Vector3f();

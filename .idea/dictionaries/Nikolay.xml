@@ -5,12 +5,17 @@
       <w>attribs</w>
       <w>coords</w>
       <w>dest</w>
+      <w>interp</w>
+      <w>isolevel</w>
+      <w>iter</w>
       <w>mouselook</w>
       <w>preprocess</w>
       <w>prevx</w>
       <w>prevy</w>
       <w>proj</w>
       <w>scancode</w>
+      <w>vert</w>
+      <w>voxel</w>
       <w>xlimit</w>
       <w>xpos</w>
       <w>ypos</w>
