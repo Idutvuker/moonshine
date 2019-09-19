@@ -96,6 +96,9 @@ public class Mouselook implements MousePosListenerI
 		if (!move_vec.equals(0.f, 0.f, 0.f))
 			move_vec.normalize();
 
+		if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
+			move_vec.mul(2f);
+
 		move_vec.mul(rotate);
 		move_vec.mul(delta * flySpeed);
 

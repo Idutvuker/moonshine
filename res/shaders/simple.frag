@@ -10,7 +10,8 @@ in VS_OUT
 out vec4 FragColor;
 
 uniform vec4 uf_color = vec4(1.f);
-uniform vec3 light_pos = vec3(5.0, 10.0, 4.0);
+uniform vec3 light_pos = vec3(5.0, 10.0, 5.0);
+
 
 #ifdef TEXTURED
     uniform sampler2D tex;

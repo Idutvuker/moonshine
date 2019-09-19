@@ -32,8 +32,6 @@ public class Mesh extends Spatial
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glObject.iboID);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
 
-		//material.use();
-
 		VertexAttribSetup setup = material.getVertexAttribSetup();
 
 		for (int i = 0; i < setup.getSize(); i++)

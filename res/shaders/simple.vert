@@ -22,7 +22,6 @@ void main()
 
     vs_out.FragPos = mat3(uf_ModelMat) * aPosition;
 
-    vs_out.Normal = mat3(uf_ModelMat) * aPosition;
     vs_out.Normal = mat3(uf_ModelMat) * aNormal;
 
     vs_out.TexCoord = texCoord;

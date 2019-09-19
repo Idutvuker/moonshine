@@ -2,11 +2,12 @@ import common.*;
 import materials.SimpleMaterial;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWErrorCallback;
-import system.GridMesh;
+import system.IsoMesh;
 import system.Mouselook;
 import system.Renderer;
 import system.Timer;
 import util.ModelLoader;
+import world.Landscape;
 import world.VoxelGrid;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class Main
 	{
 		root = new Node();
 
-		initMeshes();
+		//initMeshes();
 		initCamera();
 		initGrid();
 
@@ -59,13 +60,7 @@ public class Main
 
 	private void initGrid()
 	{
-		VoxelGrid voxelGrid = new VoxelGrid(4, 4, 4);
-		voxelGrid.set(1, 1, 1, 590);
-		voxelGrid.set(1, 1, 2, -600);
-		//voxelGrid.set(1, 1, 3, 1);
-
-		GridMesh gridMesh = new GridMesh(voxelGrid);
-		root.addChild(gridMesh);
+		Landscape landscape = new Landscape(root);
 	}
 
 	private Mouselook mouselook;
@@ -106,10 +101,10 @@ public class Main
 
 	private void initMeshes()
 	{
-		//Mesh[] meshes = ModelLoader.load("res/models/monkey.obj");
+		Mesh[] meshes = ModelLoader.load("res/models/monkey2.obj");
 
-		//for (Mesh m: meshes)
-		//	root.addChild(m);
+		for (Mesh m: meshes)
+			root.addChild(m);
 	}
 
 
@@ -158,9 +153,7 @@ public class Main
 	}
 
 	private void process(float delta)
-	{
-		//if (window.isKeyPressed(GLFW_KEY_SPACE))
-	}
+	{ }
 
 	private void quit()
 	{
